@@ -58,6 +58,7 @@
 ```bash
 uv sync                  # instala dependencias
 cp .env.example .env     # y rellena las credenciales
+chmod 600 .env           # que solo tu usuario pueda leer el secreto
 ```
 
 ```dotenv
@@ -80,7 +81,7 @@ Con el Client ID y el Client Secret basta para leer el nombre de una lista, pero
 2. Inicia sesión en Spotify y acepta los permisos (solo lectura de tus listas, incluidas privadas y colaborativas).
 3. El navegador vuelve a `http://127.0.0.1:8888/callback`, muestra *"Sesión iniciada con Spotify"* y el comando continúa. Tienes 3 minutos para completarlo.
 
-El token se guarda en `~/.cache/bingo-musical/token.json` y se renueva automáticamente, así que en las siguientes ejecuciones no se vuelve a abrir el navegador.
+El token se guarda en `~/.cache/bingo-musical/token.json` (legible solo por tu usuario: permisos `600`, carpeta `700`) y se renueva automáticamente, así que en las siguientes ejecuciones no se vuelve a abrir el navegador.
 
 > [!TIP]
 > Para cerrar sesión o entrar con otra cuenta, borra `~/.cache/bingo-musical/token.json`.
