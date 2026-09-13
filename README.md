@@ -18,7 +18,7 @@
 
 | | |
 |---|---|
-| 🎧 **Lee listas de Spotify** | Pega la URL de una lista pública y obtén todas sus canciones, sin duplicados ni podcasts. |
+| 🎧 **Lee listas de Spotify** | Pega la URL de una lista y obtén todas sus canciones, sin duplicados ni podcasts. Si Spotify lo exige, inicias sesión una sola vez en el navegador. |
 | 🃏 **Genera cartones únicos** | Elige cuántos cartones y cuántas filas × columnas. Nunca se repite una canción en un cartón ni hay dos cartones iguales. |
 | 🖨️ **Ahorra tinta** | PDF A4 apaisado en blanco y negro: título de la canción y, debajo, el artista en letra más pequeña. |
 | 📋 **Hoja de control** | Lista alfabética de todas las canciones con casillas para ir marcando las que suenan. |
@@ -48,9 +48,10 @@
 ### 2. Crea la app en Spotify
 
 1. Entra en el [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) y pulsa **Create app**.
-2. Rellena nombre y descripción. En **Redirect URIs** pon `http://127.0.0.1:8888/callback` (ahora mismo no se usa, pero es obligatorio).
+2. Rellena nombre y descripción. En **Redirect URIs** pon exactamente `http://127.0.0.1:8888/callback` (se usa para el inicio de sesión, ver más abajo).
 3. Marca **Web API** y guarda.
 4. En **Settings** copia el **Client ID** y el **Client Secret**.
+5. Si otra persona va a usar el proyecto con su cuenta, añádela en **User Management**: las apps en modo desarrollo solo admiten usuarios dados de alta.
 
 ### 3. Configura el proyecto
 
@@ -66,6 +67,23 @@ SPOTIFY_CLIENT_SECRET=tu_client_secret
 
 > [!IMPORTANT]
 > `.env` está en `.gitignore`. No compartas nunca el Client Secret.
+
+### 4. Primer inicio de sesión
+
+Con el Client ID y el Client Secret basta para leer el nombre de una lista, pero **Spotify exige una sesión de usuario para leer sus canciones**, aunque la lista sea pública. El programa lo detecta solo:
+
+1. La primera vez que pidas canciones verás:
+   ```text
+   Spotify requiere que inicies sesión para leer las canciones de esta lista.
+   Abriendo el navegador...
+   ```
+2. Inicia sesión en Spotify y acepta los permisos (solo lectura de tus listas, incluidas privadas y colaborativas).
+3. El navegador vuelve a `http://127.0.0.1:8888/callback`, muestra *"Sesión iniciada con Spotify"* y el comando continúa. Tienes 3 minutos para completarlo.
+
+El token se guarda en `~/.cache/bingo-musical/token.json` y se renueva automáticamente, así que en las siguientes ejecuciones no se vuelve a abrir el navegador.
+
+> [!TIP]
+> Para cerrar sesión o entrar con otra cuenta, borra `~/.cache/bingo-musical/token.json`.
 
 ---
 
@@ -154,6 +172,9 @@ flowchart LR
     skills["🤖 Skills Claude Code<br/><code>spotify-playlist</code><br/><code>bingo-cards</code>"]
     cli["⌨️ cli.py<br/><code>bingo-musical songs | cards</code>"]
     spotify["🎧 spotify.py<br/>SpotifyClient<br/>parse_playlist_id · clean_title"]
+    auth["🔑 auth.py<br/>get_user_token<br/>OAuth PKCE"]
+    browser(["🌐 Navegador<br/>127.0.0.1:8888/callback"])
+    cache[/"~/.cache/bingo-musical/token.json"/]
     cards["🃏 cards.py<br/>generate_cards(seed)"]
     pdf["🖨️ pdf.py<br/>render_pdf · layout_cell"]
     api[("Spotify Web API")]
@@ -163,7 +184,10 @@ flowchart LR
     user -->|terminal| cli
     skills -->|uv run| cli
     cli --> spotify
-    spotify <-->|Client Credentials<br/>paginación · reintentos| api
+    spotify <-->|Client Credentials o token de usuario<br/>paginación · reintentos| api
+    spotify -->|401/403| auth
+    auth <-->|login la 1ª vez| browser
+    auth <--> cache
     spotify -->|Playlist + Tracks| cards
     cards -->|Cards| pdf
     spotify -. clean_title .-> pdf
@@ -176,6 +200,7 @@ sequenceDiagram
     participant U as Usuario
     participant C as cli.py
     participant S as spotify.py
+    participant K as auth.py
     participant A as Spotify API
     participant G as cards.py
     participant P as pdf.py
@@ -184,8 +209,19 @@ sequenceDiagram
     C->>S: fetch_playlist(URL)
     S->>A: POST /api/token (client credentials)
     S->>A: GET /playlists/{id}
+    S->>A: GET /playlists/{id}/items
+    A-->>S: 401 (hace falta sesión de usuario)
+    S->>K: get_user_token()
+    alt token en caché válido o renovable
+        K-->>S: access token
+    else sin caché
+        K->>U: abre el navegador (login + permisos)
+        U-->>K: redirección a 127.0.0.1:8888/callback con código
+        K->>A: POST /api/token (authorization_code + code_verifier)
+        K-->>S: access token (se guarda en caché)
+    end
     loop páginas de 100
-        S->>A: GET /playlists/{id}/items
+        S->>A: GET /playlists/{id}/items (token de usuario)
     end
     S-->>C: Playlist (sin duplicados ni podcasts)
     C->>G: generate_cards(tracks, 20, 3, 4, seed)
@@ -196,7 +232,8 @@ sequenceDiagram
 
 | Módulo | Responsabilidad |
 |---|---|
-| `spotify.py` | Token Client Credentials, paginación, reintentos ante `429`/`401`, filtrado de episodios y pistas locales, deduplicado y limpieza de títulos. |
+| `spotify.py` | Token Client Credentials, paso automático a token de usuario ante `401`/`403`, paginación, reintentos ante `429`, filtrado de episodios y pistas locales, deduplicado y limpieza de títulos. |
+| `auth.py` | Inicio de sesión OAuth Authorization Code + PKCE: abre el navegador, recibe el código en un servidor local (`127.0.0.1:8888`), y guarda y renueva el token en `~/.cache/bingo-musical/token.json`. |
 | `cards.py` | Lógica pura: reparte canciones al azar con semilla, garantiza cartones distintos y valida que haya suficientes canciones. |
 | `pdf.py` | Maquetación con reportlab: rejilla, ajuste automático del tamaño de letra, fuente TTF con tildes y hoja de control paginada. |
 | `cli.py` | Punto de entrada `bingo-musical` y mensajes de error legibles. |
@@ -216,6 +253,7 @@ bingo-musical/
 ├── 🐍 src/bingo_musical/
 │   ├── cli.py                   # comandos songs / cards
 │   ├── spotify.py               # cliente de la API de Spotify
+│   ├── auth.py                  # inicio de sesión OAuth PKCE y caché del token
 │   ├── cards.py                 # generación de cartones
 │   └── pdf.py                   # render del PDF
 ├── 🧪 tests/
@@ -246,8 +284,11 @@ Los tests no llaman a Spotify: las respuestas de la API se simulan.
 |---|---|
 | `Faltan credenciales de Spotify` | No existe `.env` o está vacío. Copia `.env.example` y rellena las dos variables. |
 | `No se pudo obtener el token (400/401)` | Client ID o Secret incorrectos. Cópialos de nuevo desde **Settings** de la app. |
-| `Spotify no encuentra la lista` (404) | La lista es privada o es editorial/algorítmica de Spotify (*Top 50*, *Descubrimiento semanal*…), que las apps nuevas no pueden leer. **Solución:** copia sus canciones a una lista pública tuya. |
-| `Acceso denegado` (403) | Restricción de Spotify para apps en modo desarrollo. |
+| `Spotify no encuentra la lista` (404) | La URL es incorrecta o la lista es editorial/algorítmica de Spotify (*Top 50*, *Descubrimiento semanal*…), que las apps nuevas no pueden leer. **Solución:** copia sus canciones a una lista tuya. |
+| `Spotify ha denegado el acceso a la lista` (403) | Tras iniciar sesión, tu cuenta no puede leer esa lista (privada de otra persona) o no está dada de alta en **User Management** de la app. |
+| `No se pudo completar el login en Spotify` | Cancelaste los permisos, pasaron los 3 minutos o la Redirect URI de la app no es exactamente `http://127.0.0.1:8888/callback`. Vuelve a lanzar el comando. |
+| `Address already in use` | Otro programa ocupa el puerto `8888`. Ciérralo y repite. |
+| Entra con la cuenta equivocada | Borra `~/.cache/bingo-musical/token.json` y vuelve a lanzar el comando. |
 | `La lista tiene X canciones y un cartón … necesita Y` | Reduce filas/columnas o usa una lista más larga. |
 | Caracteres que no se ven en el PDF | La fuente del sistema (Arial/DejaVu) no incluye ese alfabeto o emoji. |
 

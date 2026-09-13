@@ -12,6 +12,8 @@ from typing import Callable, Iterator
 import httpx
 from dotenv import load_dotenv
 
+from .auth import SpotifyAuthError, get_user_token
+
 API_URL = "https://api.spotify.com/v1"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 
@@ -100,6 +102,7 @@ class SpotifyClient:
         self._sleep = sleep
         self._http = httpx.Client(transport=transport, timeout=20)
         self._token: str | None = None
+        self._auth_mode = "app"  # "app" (Client Credentials) o "user" (login OAuth PKCE)
 
     def _fetch_token(self) -> None:
         resp = self._http.post(
@@ -114,19 +117,34 @@ class SpotifyClient:
                 resp.status_code,
             )
         self._token = resp.json()["access_token"]
+        self._auth_mode = "app"
+
+    def _fetch_user_token(self) -> None:
+        # Spotify exige una sesión de usuario para listar canciones de playlists
+        # (Client Credentials solo sirve para metadatos y búsquedas).
+        try:
+            self._token = get_user_token(self.client_id)
+        except SpotifyAuthError as exc:
+            raise SpotifyError(str(exc)) from exc
+        self._auth_mode = "user"
 
     def _get(self, url: str, params: dict | None = None) -> dict:
         if self._token is None:
             self._fetch_token()
         refreshed = False
+        switched_user = False
         retries = 0
         while True:
             resp = self._http.get(
                 url, params=params, headers={"Authorization": f"Bearer {self._token}"}
             )
-            if resp.status_code == 401 and not refreshed:
+            if resp.status_code == 401 and self._auth_mode == "app" and not refreshed:
                 refreshed = True
                 self._fetch_token()
+                continue
+            if resp.status_code in (401, 403) and self._auth_mode == "app" and not switched_user:
+                switched_user = True
+                self._fetch_user_token()
                 continue
             if resp.status_code == 429 and retries < self.max_retries:
                 retries += 1
