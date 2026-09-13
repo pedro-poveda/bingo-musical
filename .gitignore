@@ -1,0 +1,23 @@
+.env
+.venv/
+output/
+__pycache__/
+*.pyc
+.pytest_cache/
+requirements.md
+
+# Obsidian
+.obsidian/
+.trash/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.DocumentRevisions-V100
+Icon?
