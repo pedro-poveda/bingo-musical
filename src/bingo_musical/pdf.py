@@ -217,25 +217,30 @@ def _draw_control_sheets(c: Canvas, playlist: Playlist, seed: int, clean: bool) 
     return pages
 
 
-def render_pdf(
-    playlist: Playlist,
-    cards: Sequence[Card],
-    path: Path,
-    seed: int,
-    control_sheet: bool = True,
-    clean: bool = True,
-) -> int:
-    """Escribe el PDF y devuelve el número de páginas."""
+def _canvas(path: Path, title: str) -> Canvas:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     c = Canvas(str(path), pagesize=(PAGE_W, PAGE_H))
-    c.setTitle(f"Bingo musical · {playlist.name}")
+    c.setTitle(title)
     c.setCreator("bingo-musical")
+    return c
+
+
+def render_cards_pdf(
+    playlist: Playlist, cards: Sequence[Card], path: Path, seed: int, clean: bool = True
+) -> int:
+    """Escribe el PDF de cartones (una página por cartón) y devuelve el número de páginas."""
+    c = _canvas(path, f"Bingo musical · {playlist.name}")
     for card in cards:
         _draw_card(c, playlist, card, seed, clean)
         c.showPage()
-    pages = len(cards)
-    if control_sheet:
-        pages += _draw_control_sheets(c, playlist, seed, clean)
+    c.save()
+    return len(cards)
+
+
+def render_control_sheet_pdf(playlist: Playlist, path: Path, seed: int, clean: bool = True) -> int:
+    """Escribe el PDF de la hoja de control y devuelve el número de páginas."""
+    c = _canvas(path, f"Hoja de control · {playlist.name}")
+    pages = _draw_control_sheets(c, playlist, seed, clean)
     c.save()
     return pages

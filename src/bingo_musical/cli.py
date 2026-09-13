@@ -7,11 +7,15 @@ import json
 import re
 import sys
 import unicodedata
+from datetime import datetime
 from pathlib import Path
 
 from .cards import CardError, generate_cards, new_seed, similarity_warning
-from .pdf import render_pdf
+from .pdf import render_cards_pdf, render_control_sheet_pdf
 from .spotify import SpotifyClient, SpotifyError
+
+CARDS_FILE = "cartones.pdf"
+CONTROL_FILE = "hoja-control.pdf"
 
 
 def _positive_int(value: str) -> int:
@@ -24,6 +28,12 @@ def _positive_int(value: str) -> int:
 def _slug(text: str) -> str:
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
     return re.sub(r"[^a-zA-Z0-9]+", "-", text).strip("-").lower() or "lista"
+
+
+def output_dir(playlist_name: str, base: Path | None = None, now: datetime | None = None) -> Path:
+    """Carpeta de un bingo: <base>/<lista>/<yyyymmdd_hhmmss>."""
+    stamp = (now or datetime.now()).strftime("%Y%m%d_%H%M%S")
+    return (base or Path("output")) / _slug(playlist_name) / stamp
 
 
 def cmd_songs(args: argparse.Namespace) -> int:
@@ -47,19 +57,18 @@ def cmd_cards(args: argparse.Namespace) -> int:
     playlist = SpotifyClient().fetch_playlist(args.url)
     seed = args.seed if args.seed is not None else new_seed()
     cards = generate_cards(playlist.tracks, args.cards, args.rows, args.cols, seed)
-    output = args.output or Path("output") / f"bingo-{_slug(playlist.name)}.pdf"
-    pages = render_pdf(
-        playlist,
-        cards,
-        output,
-        seed,
-        control_sheet=not args.no_control_sheet,
-        clean=not args.full_titles,
-    )
+    folder = output_dir(playlist.name, args.output)
+    clean = not args.full_titles
+    cards_path = folder / CARDS_FILE
+    pages = render_cards_pdf(playlist, cards, cards_path, seed, clean=clean)
     warning = similarity_warning(len(playlist.tracks), args.rows, args.cols)
     if warning:
         print(warning, file=sys.stderr)
-    print(f"PDF generado: {output.resolve()}")
+    print(f"Cartones: {cards_path.resolve()}")
+    if not args.no_control_sheet:
+        control_path = folder / CONTROL_FILE
+        control_pages = render_control_sheet_pdf(playlist, control_path, seed, clean=clean)
+        print(f"Hoja de control: {control_path.resolve()} ({control_pages} páginas)")
     print(f"Lista: {playlist.name} ({len(playlist.tracks)} canciones)")
     print(f"Cartones: {len(cards)} de {args.rows}×{args.cols} · {pages} páginas")
     print(f"Semilla: {seed}")
@@ -83,8 +92,12 @@ def build_parser() -> argparse.ArgumentParser:
     cards.add_argument("--rows", type=_positive_int, default=3, help="Filas por cartón (3)")
     cards.add_argument("--cols", type=_positive_int, default=4, help="Columnas por cartón (4)")
     cards.add_argument("--seed", type=int, help="Semilla para reproducir los mismos cartones")
-    cards.add_argument("--output", type=Path, help="Ruta del PDF (output/bingo-<lista>.pdf)")
-    cards.add_argument("--no-control-sheet", action="store_true", help="Sin hoja de control")
+    cards.add_argument(
+        "--output",
+        type=Path,
+        help="Carpeta base (output); los PDF van en <base>/<lista>/<yyyymmdd_hhmmss>/",
+    )
+    cards.add_argument("--no-control-sheet", action="store_true", help="No generar el PDF de hoja de control")
     cards.add_argument(
         "--full-titles", action="store_true", help="No quitar '(feat. …)', '- Remastered', etc."
     )

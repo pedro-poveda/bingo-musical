@@ -120,11 +120,14 @@ uv run bingo-musical cards "https://open.spotify.com/playlist/<id>" --cards 20 -
 ```
 
 ```text
-PDF generado: /…/bingo-musical/output/bingo-clasicos-de-la-fiesta-de-verano.pdf
+Cartones: /…/bingo-musical/output/clasicos-de-la-fiesta-de-verano/20260913_180509/cartones.pdf
+Hoja de control: /…/bingo-musical/output/clasicos-de-la-fiesta-de-verano/20260913_180509/hoja-control.pdf (1 páginas)
 Lista: Clásicos de la Fiesta de Verano (27 canciones)
-Cartones: 20 de 3×4 · 21 páginas
+Cartones: 20 de 3×4 · 20 páginas
 Semilla: 482913
 ```
+
+Cada ejecución crea su propia carpeta `output/<lista>/<yyyymmdd_hhmmss>/` con dos PDF: `cartones.pdf` y `hoja-control.pdf`.
 
 | Opción | Por defecto | Descripción |
 |---|---|---|
@@ -132,8 +135,8 @@ Semilla: 482913
 | `--rows N` | `3` | Filas de cada cartón. |
 | `--cols N` | `4` | Columnas de cada cartón. |
 | `--seed N` | aleatoria | Semilla para regenerar los mismos cartones. |
-| `--output RUTA` | `output/bingo-<lista>.pdf` | Dónde guardar el PDF. |
-| `--no-control-sheet` | — | No añadir la hoja de control al final. |
+| `--output CARPETA` | `output` | Carpeta base; los PDF se guardan en `<CARPETA>/<lista>/<yyyymmdd_hhmmss>/`. |
+| `--no-control-sheet` | — | No generar `hoja-control.pdf`. |
 | `--full-titles` | — | Mantener coletillas como `(feat. …)` o `- Remastered 2011`. |
 
 > [!TIP]
@@ -160,7 +163,7 @@ También puedes invocarlas directamente:
 /spotify-playlist https://open.spotify.com/playlist/<id>
 ```
 
-Claude te devolverá la ruta del PDF y la semilla usada.
+Claude te devolverá las rutas de los PDF y la semilla usada.
 
 ---
 
@@ -176,9 +179,9 @@ flowchart LR
     browser(["🌐 Navegador<br/>127.0.0.1:8888/callback"])
     cache[/"~/.cache/bingo-musical/token.json"/]
     cards["🃏 cards.py<br/>generate_cards(seed)"]
-    pdf["🖨️ pdf.py<br/>render_pdf · layout_cell"]
+    pdf["🖨️ pdf.py<br/>render_cards_pdf · render_control_sheet_pdf"]
     api[("Spotify Web API")]
-    out[/"📄 output/bingo-&lt;lista&gt;.pdf"/]
+    out[/"📄 output/&lt;lista&gt;/&lt;yyyymmdd_hhmmss&gt;/<br/>cartones.pdf · hoja-control.pdf"/]
 
     user -->|lenguaje natural| skills
     user -->|terminal| cli
@@ -226,8 +229,9 @@ sequenceDiagram
     S-->>C: Playlist (sin duplicados ni podcasts)
     C->>G: generate_cards(tracks, 20, 3, 4, seed)
     G-->>C: 20 cartones únicos
-    C->>P: render_pdf(playlist, cards, seed)
-    P-->>U: PDF + semilla
+    C->>P: render_cards_pdf(playlist, cards, seed)
+    C->>P: render_control_sheet_pdf(playlist, seed)
+    P-->>U: cartones.pdf + hoja-control.pdf + semilla
 ```
 
 | Módulo | Responsabilidad |
@@ -259,9 +263,10 @@ bingo-musical/
 ├── 🧪 tests/
 │   ├── test_spotify.py          # API simulada con httpx.MockTransport
 │   ├── test_cards.py
+│   ├── test_cli.py
 │   └── test_pdf.py
 ├── 🖼️ docs/                     # capturas del README
-└── 📂 output/                   # PDFs generados (ignorado en git)
+└── 📂 output/<lista>/<fecha>/   # cartones.pdf y hoja-control.pdf (ignorado en git)
 ```
 
 ---

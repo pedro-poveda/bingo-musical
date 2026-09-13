@@ -9,20 +9,22 @@ description: Genera cartones de bingo musical en PDF (A4 apaisado, blanco y negr
 2. Ejecuta desde la raíz del proyecto:
 
 ```bash
-uv run bingo-musical cards "<URL>" --cards 10 --rows 3 --cols 4 [--seed 1234] [--output output/mi-bingo.pdf]
+uv run bingo-musical cards "<URL>" --cards 10 --rows 3 --cols 4 [--seed 1234] [--output output]
 ```
 
 Opciones:
 - `--seed N`: regenera exactamente los mismos cartones (misma lista y mismos parámetros).
-- `--no-control-sheet`: omite la hoja de control final (lista alfabética de canciones con casillas para marcar las que suenan).
+- `--output CARPETA`: carpeta base (por defecto `output`); cada ejecución crea `<CARPETA>/<lista>/<yyyymmdd_hhmmss>/`.
+- `--no-control-sheet`: no genera el PDF de la hoja de control (lista alfabética de canciones con casillas para marcar las que suenan).
 - `--full-titles`: no recorta coletillas como `(feat. …)` o `- Remastered 2011`.
 
-3. Informa al usuario de la ruta del PDF, el nº de canciones, los cartones generados y la **semilla** (para poder reimprimir los mismos cartones).
+3. Informa al usuario de las rutas de los PDF, el nº de canciones, los cartones generados y la **semilla** (para poder reimprimir los mismos cartones).
 
-## Contenido del PDF
+## PDF generados
 
-- Una página por cartón: título de la lista y "Cartón nº X" en el encabezado; en cada casilla el título de la canción y debajo, más pequeño, el artista.
-- Al final, la hoja de control.
+En `output/<lista>/<yyyymmdd_hhmmss>/`:
+- `cartones.pdf`: una página por cartón; título de la lista y "Cartón nº X" en el encabezado; en cada casilla el título de la canción y debajo, más pequeño, el artista.
+- `hoja-control.pdf`: la hoja de control, paginada.
 
 ## Errores habituales
 
