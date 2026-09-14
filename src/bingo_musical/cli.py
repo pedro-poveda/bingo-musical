@@ -76,9 +76,7 @@ def cmd_cards(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="bingo-musical", description="Bingo musical a partir de listas de Spotify."
-    )
+    parser = argparse.ArgumentParser(prog="bingo-musical", description="Bingo musical a partir de listas de Spotify.")
     sub = parser.add_subparsers(dest="command", required=True)
 
     songs = sub.add_parser("songs", help="Lista las canciones de una lista de Spotify")
@@ -98,9 +96,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Carpeta base (output); los PDF van en <base>/<lista>/<yyyymmdd_hhmmss>/",
     )
     cards.add_argument("--no-control-sheet", action="store_true", help="No generar el PDF de hoja de control")
-    cards.add_argument(
-        "--full-titles", action="store_true", help="No quitar '(feat. …)', '- Remastered', etc."
-    )
+    cards.add_argument("--full-titles", action="store_true", help="No quitar '(feat. …)', '- Remastered', etc.")
     cards.set_defaults(func=cmd_cards)
     return parser
 

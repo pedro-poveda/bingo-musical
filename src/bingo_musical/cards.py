@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import math
 import random
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 from .spotify import Track
 

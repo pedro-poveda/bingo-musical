@@ -2,18 +2,40 @@
 name = "bingo-musical"
 version = "0.1.0"
 description = "Genera cartones de bingo musical en PDF a partir de listas de Spotify"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Pedro Poveda Buedo" }]
 requires-python = ">=3.11"
+keywords = ["bingo", "spotify", "pdf", "música", "reportlab"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: Spanish",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Games/Entertainment",
+    "Topic :: Multimedia :: Sound/Audio",
+]
 dependencies = [
     "httpx>=0.27",
     "reportlab>=4.2",
     "python-dotenv>=1.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/pedro-poveda/bingo-musical"
+Issues = "https://github.com/pedro-poveda/bingo-musical/issues"
+Changelog = "https://github.com/pedro-poveda/bingo-musical/blob/main/CHANGELOG.md"
+
 [project.scripts]
 bingo-musical = "bingo_musical.cli:main"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
@@ -23,7 +45,15 @@ packages = ["src/bingo_musical"]
 dev = [
     "pytest>=8",
     "pypdf>=5",
+    "ruff>=0.16",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N"]

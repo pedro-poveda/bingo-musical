@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import functools
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
@@ -208,9 +208,7 @@ def _draw_control_sheets(c: Canvas, playlist: Playlist, seed: int, clean: bool) 
             if track.artist_line and rest > 15:
                 c.setFillGray(0.25)
                 c.setFont(regular, size)
-                c.drawString(
-                    text_x + used, baseline, " · " + truncate(track.artist_line, regular, size, rest)
-                )
+                c.drawString(text_x + used, baseline, " · " + truncate(track.artist_line, regular, size, rest))
                 c.setFillGray(0)
         _draw_footer(c, f"{len(entries)} canciones · semilla {seed}")
         c.showPage()
@@ -226,9 +224,7 @@ def _canvas(path: Path, title: str) -> Canvas:
     return c
 
 
-def render_cards_pdf(
-    playlist: Playlist, cards: Sequence[Card], path: Path, seed: int, clean: bool = True
-) -> int:
+def render_cards_pdf(playlist: Playlist, cards: Sequence[Card], path: Path, seed: int, clean: bool = True) -> int:
     """Escribe el PDF de cartones (una página por cartón) y devuelve el número de páginas."""
     c = _canvas(path, f"Bingo musical · {playlist.name}")
     for card in cards:

@@ -7,8 +7,11 @@ from bingo_musical.spotify import Playlist, Track
 
 def make_playlist(n):
     tracks = [
-        Track(id="long", name="Una canción con un título larguísimo que no cabe en una sola línea ni en dos " * 2,
-              artists=("Artista Uno", "Artista Dos", "Tercera Artista Con Nombre Largo")),
+        Track(
+            id="long",
+            name="Una canción con un título larguísimo que no cabe en una sola línea ni en dos " * 2,
+            artists=("Artista Uno", "Artista Dos", "Tercera Artista Con Nombre Largo"),
+        ),
         Track(id="accents", name="Mediterráneo (feat. Niña Pastori)", artists=("Joan Manuel Serrat",)),
     ]
     tracks += [Track(id=f"t{i}", name=f"Canción {i}", artists=(f"Artista {i}",)) for i in range(n - 2)]

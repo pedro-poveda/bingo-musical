@@ -6,8 +6,8 @@ import os
 import re
 import time
 import unicodedata
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
-from typing import Callable, Iterator
 
 import httpx
 from dotenv import load_dotenv
@@ -135,9 +135,7 @@ class SpotifyClient:
         switched_user = False
         retries = 0
         while True:
-            resp = self._http.get(
-                url, params=params, headers={"Authorization": f"Bearer {self._token}"}
-            )
+            resp = self._http.get(url, params=params, headers={"Authorization": f"Bearer {self._token}"})
             if resp.status_code == 401 and self._auth_mode == "app" and not refreshed:
                 refreshed = True
                 self._fetch_token()

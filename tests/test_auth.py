@@ -14,9 +14,7 @@ def callback():
     """Servidor de callback en un puerto libre esperando en segundo plano."""
     server = auth._CallbackServer(("127.0.0.1", 0), STATE)
     result = {}
-    thread = threading.Thread(
-        target=lambda: result.update(value=auth._wait_for_callback(server, timeout=5))
-    )
+    thread = threading.Thread(target=lambda: result.update(value=auth._wait_for_callback(server, timeout=5)))
     thread.start()
     base = f"http://127.0.0.1:{server.server_address[1]}"
     yield base, result, thread
