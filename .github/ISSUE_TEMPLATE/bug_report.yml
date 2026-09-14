@@ -1,0 +1,48 @@
+name: 🐛 Informar de un error
+description: Algo no funciona como debería.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Gracias por avisar! Antes de enviar, revisa la sección **Problemas frecuentes** del README.
+
+        > ⚠️ **No pegues** tu Client ID/Secret, tokens, el contenido de `.env` ni URLs de listas privadas.
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: ¿Qué ha pasado?
+      description: Describe el error y qué esperabas que ocurriera.
+    validations:
+      required: true
+  - type: textarea
+    id: comando
+    attributes:
+      label: Comando ejecutado
+      description: El comando exacto (puedes sustituir el id de la lista por `<id>`).
+      render: bash
+      placeholder: uv run bingo-musical cards '<id>' --cards 10 --rows 3 --cols 4
+    validations:
+      required: true
+  - type: textarea
+    id: salida
+    attributes:
+      label: Salida o mensaje de error
+      render: text
+  - type: input
+    id: so
+    attributes:
+      label: Sistema operativo
+      placeholder: macOS 15, Ubuntu 24.04, Windows 11…
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Versión de Python y de uv
+      placeholder: Python 3.12, uv 0.11
+  - type: textarea
+    id: extra
+    attributes:
+      label: Información adicional
+      description: Capturas del PDF, pistas de cuándo empezó a fallar, etc.

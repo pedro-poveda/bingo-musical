@@ -1,0 +1,28 @@
+name: ✨ Proponer una mejora
+description: Una idea para hacer Bingo Musical más útil.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: ¿Qué problema resolvería?
+      description: Cuéntanos la situación, p. ej. "Cuando preparo un bingo para 100 personas…".
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Propuesta
+      description: Cómo te imaginas la solución (opción nueva de la CLI, cambio en el PDF…).
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+  - type: checkboxes
+    id: ayuda
+    attributes:
+      label: Colaboración
+      options:
+        - label: Me gustaría implementarlo yo mismo/a con un pull request.

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Informar de una vulnerabilidad
+    url: https://github.com/pedro-poveda/bingo-musical/security/advisories/new
+    about: Avísanos en privado, no en un issue público. Ver SECURITY.md.
+  - name: 📘 Documentación y problemas frecuentes
+    url: https://github.com/pedro-poveda/bingo-musical#-problemas-frecuentes
+    about: Revisa aquí los errores más habituales antes de abrir un issue.
