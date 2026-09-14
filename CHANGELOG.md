@@ -6,14 +6,9 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
-### Añadido
+## [0.1.0] - 2026-09-15
 
-- Licencia MIT, guía de contribución, código de conducta y política de seguridad.
-- Plantillas de issues y pull requests, CODEOWNERS y Dependabot.
-- Integración continua con GitHub Actions (ruff y pytest en Linux y macOS).
-- Linter y formateador `ruff`.
-
-## [0.1.0] - 2026-09-13
+Primera versión pública.
 
 ### Añadido
 
@@ -22,6 +17,10 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - Hoja de control en un PDF aparte y carpetas de salida por lista y fecha.
 - Inicio de sesión OAuth Authorization Code + PKCE cuando Client Credentials no basta para leer las canciones.
 - Skills de Claude Code `spotify-playlist` y `bingo-cards`.
+- Licencia MIT, guía de contribución, código de conducta y política de seguridad.
+- Plantillas de issues y pull requests, CODEOWNERS y Dependabot.
+- Integración continua con GitHub Actions (ruff y pytest en Linux y macOS).
+- Linter y formateador `ruff`.
 
 ### Seguridad
 
