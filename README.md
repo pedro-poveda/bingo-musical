@@ -4,6 +4,8 @@
 
 **Convierte cualquier lista de Spotify en cartones de bingo listos para imprimir.**
 
+[![CI](https://github.com/pedro-poveda/bingo-musical/actions/workflows/ci.yml/badge.svg)](https://github.com/pedro-poveda/bingo-musical/actions/workflows/ci.yml)
+[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-green)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white)
 ![uv](https://img.shields.io/badge/gestor-uv-DE5FE9)
 ![Spotify Web API](https://img.shields.io/badge/Spotify-Web%20API-1DB954?logo=spotify&logoColor=white)
@@ -52,6 +54,9 @@
 3. Marca **Web API** y guarda.
 4. En **Settings** copia el **Client ID** y el **Client Secret**.
 5. Si otra persona va a usar el proyecto con su cuenta, añádela en **User Management**: las apps en modo desarrollo solo admiten usuarios dados de alta.
+
+> [!NOTE]
+> Este repositorio no incluye credenciales: **cada persona que lo clone necesita crear su propia app de Spotify**.
 
 ### 3. Configura el proyecto
 
@@ -249,7 +254,10 @@ sequenceDiagram
 
 ```text
 bingo-musical/
-├── 📄 pyproject.toml            # dependencias y entrypoint `bingo-musical`
+├── 📄 pyproject.toml            # dependencias, entrypoint `bingo-musical` y config de ruff
+├── 📜 LICENSE                   # licencia MIT
+├── 🤝 CONTRIBUTING.md           # cómo contribuir (y CODE_OF_CONDUCT, SECURITY, CHANGELOG)
+├── ⚙️ .github/                  # CI, Dependabot, CODEOWNERS y plantillas de issues/PR
 ├── 🔐 .env.example              # plantilla de credenciales de Spotify
 ├── 📘 CLAUDE.md                 # guía para Claude Code
 ├── 🤖 .claude/skills/
@@ -282,6 +290,13 @@ uv run pytest tests/test_cards.py::test_same_seed_same_cards   # un test
 
 Los tests no llaman a Spotify: las respuestas de la API se simulan.
 
+Estilo y formato con [ruff](https://docs.astral.sh/ruff/) (la CI lo comprueba en cada pull request):
+
+```bash
+uv run ruff check .          # linter
+uv run ruff format .         # formatea el código
+```
+
 ---
 
 ## 🩺 Problemas frecuentes
@@ -297,6 +312,16 @@ Los tests no llaman a Spotify: las respuestas de la API se simulan.
 | Entra con la cuenta equivocada | Borra `~/.cache/bingo-musical/token.json` y vuelve a lanzar el comando. |
 | `La lista tiene X canciones y un cartón … necesita Y` | Reduce filas/columnas o usa una lista más larga. |
 | Caracteres que no se ven en el PDF | La fuente del sistema (Arial/DejaVu) no incluye ese alfabeto o emoji. |
+
+---
+
+## 🤝 Contribuir
+
+¡Las contribuciones son bienvenidas! Lee la [guía de contribución](CONTRIBUTING.md) y el [código de conducta](CODE_OF_CONDUCT.md) antes de abrir un issue o un pull request. Para avisar de una vulnerabilidad, sigue la [política de seguridad](SECURITY.md). Los cambios se registran en el [CHANGELOG](CHANGELOG.md).
+
+## 📜 Licencia
+
+Distribuido bajo la [licencia MIT](LICENSE).
 
 ---
 

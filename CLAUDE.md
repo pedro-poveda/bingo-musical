@@ -9,14 +9,15 @@ Genera cartones de bingo musical en PDF (A4 apaisado, blanco y negro: título de
 ## Comandos
 
 ```bash
-uv sync                                   # instala dependencias (incluye grupo dev: pytest, pypdf)
+uv sync                                   # instala dependencias (incluye grupo dev: pytest, pypdf, ruff)
 uv run pytest                             # todos los tests
 uv run pytest tests/test_cards.py::test_same_seed_same_cards   # un test concreto
+uv run ruff check . && uv run ruff format --check .            # linter y formato (config en pyproject.toml)
 uv run bingo-musical songs "<url>" [--json]
 uv run bingo-musical cards "<url>" --cards 10 --rows 3 --cols 4 [--seed N] [--output carpeta] [--no-control-sheet] [--full-titles]
 ```
 
-No hay linter ni formateador configurado. Cada ejecución de `cards` crea `output/<slug-lista>/<yyyymmdd_hhmmss>/` (ignorado en git; `--output` cambia la carpeta base) con dos PDF: `cartones.pdf` y `hoja-control.pdf`.
+La CI (`.github/workflows/ci.yml`) ejecuta ruff y pytest en Linux y macOS con Python 3.11 y 3.13; el job `ci-ok` agrupa el resultado y es el check exigido para mergear PR en `main`. Proyecto open source (MIT): al cambiar la CLI actualiza `README.md`, las skills y `CHANGELOG.md` (sección *Sin publicar*); ver `CONTRIBUTING.md`. Cada ejecución de `cards` crea `output/<slug-lista>/<yyyymmdd_hhmmss>/` (ignorado en git; `--output` cambia la carpeta base) con dos PDF: `cartones.pdf` y `hoja-control.pdf`.
 
 ## Arquitectura
 
